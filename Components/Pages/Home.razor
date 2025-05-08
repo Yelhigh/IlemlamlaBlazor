@@ -1,0 +1,59 @@
+﻿@page "/"
+@using System.Text.Json
+@using IlemlamlaBlazor.Models
+
+<h1>Birthday Data</h1>
+
+@if (birthdayItems == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Position</th>
+                <th>Name</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in birthdayItems)
+            {
+                <tr>
+                    <td>@item.Position</td>
+                    <td>@item.Name</td>
+                    <td>@FormatDate(item.Date)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<BirthdayItem> birthdayItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var json = await File.ReadAllTextAsync("wwwroot/data.json");
+            var data = JsonSerializer.Deserialize<BirthdayData>(json);
+            birthdayItems = data.List.OrderBy(x => int.Parse(x.Position)).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+        }
+    }
+
+    private string FormatDate(string dateString)
+    {
+        if (DateTime.TryParseExact(dateString, "yyyyMMddHHmm", null, System.Globalization.DateTimeStyles.None, out DateTime date))
+        {
+            return date.ToString("yyyy-MM-dd HH:mm");
+        }
+        return dateString; // Return original string if parsing fails
+    }
+}
