@@ -3,27 +3,77 @@
 @using IlemlamlaBlazor.Models
 @inject IBirthdayDataService BirthdayDataService
 
-<h1>Birthday Data</h1>
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+    }
+
+    h1 {
+        color: #4A90E2;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .table {
+        width: 80%;
+        margin: 0 auto;
+        border-collapse: collapse;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table thead {
+        background-color: #4A90E2;
+        color: white;
+    }
+
+    .table th, .table td {
+        padding: 12px 15px;
+        text-align: left;
+    }
+
+    .table tbody tr {
+        border-bottom: 1px solid #dddddd;
+    }
+
+    .table tbody tr:nth-of-type(even) {
+        background-color: #f9f9f9;
+    }
+
+    .table tbody tr:last-of-type {
+        border-bottom: 2px solid #4A90E2;
+    }
+
+    .loading {
+        text-align: center;
+        color: #4A90E2;
+        font-size: 18px;
+    }
+</style>
+
+<h1>ILEMLAMLA</h1>
 
 @if (birthdayItems == null)
 {
-    <p>Loading...</p>
+    <p class="loading">Loading...</p>
 }
 else
 {
     <table class="table">
         <thead>
             <tr>
-                <th>Position</th>
-                <th>Name</th>
-                <th>Date</th>
+                <th>Kto</th>
+                <th>Ilemlamla</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in birthdayItems)
             {
                 <tr>
-                    <td>@item.Position</td>
                     <td>@item.Name</td>
                     <td>@FormatDate(item.Date)</td>
                 </tr>
@@ -46,6 +96,6 @@ else
         {
             return date.ToString("yyyy-MM-dd HH:mm");
         }
-        return dateString; // Return original string if parsing fails
+        return dateString;
     }
 }
