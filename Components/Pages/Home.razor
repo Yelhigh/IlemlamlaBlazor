@@ -1,6 +1,7 @@
 ﻿@page "/"
-@using System.Text.Json
+@using IlemlamlaBlazor.Interfaces
 @using IlemlamlaBlazor.Models
+@inject IBirthdayDataService BirthdayDataService
 
 <h1>Birthday Data</h1>
 
@@ -36,16 +37,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        try
-        {
-            var json = await File.ReadAllTextAsync("wwwroot/data.json");
-            var data = JsonSerializer.Deserialize<BirthdayData>(json);
-            birthdayItems = data.List.OrderBy(x => int.Parse(x.Position)).ToList();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception: {ex.Message}");
-        }
+        birthdayItems = await BirthdayDataService.GetBirthdayItemsAsync();
     }
 
     private string FormatDate(string dateString)
