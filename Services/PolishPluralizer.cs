@@ -60,6 +60,7 @@ namespace IlemlamlaBlazor.Services
 
         public string PluralizeYears(double years)
         {
+            if (years < 1) return "roku";
             var roundedYears = (int)years;
             if (roundedYears == 1) return "rok";
             if (roundedYears % 10 >= 2 && roundedYears % 10 <= 4 && roundedYears % 100 != 12 && roundedYears % 100 != 13 && roundedYears % 100 != 14)
