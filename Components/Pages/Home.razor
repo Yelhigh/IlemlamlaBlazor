@@ -1,8 +1,10 @@
 ﻿@page "/"
 @using IlemlamlaBlazor.Interfaces
 @using IlemlamlaBlazor.Models
+@using IlemlamlaBlazor.Utils
 @using Microsoft.JSInterop
 @inject IBirthdayDataService BirthdayDataService
+@inject IAgeCalculator AgeCalculator
 @inject IJSRuntime JSRuntime
 
 <style>
@@ -112,7 +114,7 @@
                 {
                     <tr class="fancy-row" @onmousemove="@(e => ShowTooltip(e, item))" @onmouseout="HideTooltip">
                         <td>@item.Name</td>
-                        <td>@FormatDate(item.Date)</td>
+                        <td>@GetAgeInfo(item)</td>
                     </tr>
                 }
             </tbody>
@@ -128,21 +130,23 @@
         birthdayItems = await BirthdayDataService.GetBirthdayItemsAsync();
     }
 
-    private string FormatDate(string dateString)
+    private string GetAgeInfo(BirthdayItem item)
     {
-        if (DateTime.TryParseExact(dateString, "yyyyMMddHHmm", null, System.Globalization.DateTimeStyles.None, out DateTime date))
+        if (DateTime.TryParseExact(item.Date, "yyyyMMddHHmm", null, System.Globalization.DateTimeStyles.None, out DateTime birthDate))
         {
-            return date.ToString("yyyy-MM-dd HH:mm");
+            return AgeCalculator.FormatAgeInPolish(item.Name, birthDate);
         }
-        return dateString;
+        return "Nieprawidłowa data";
     }
 
     private async Task ShowTooltip(MouseEventArgs e, BirthdayItem item)
     {
-        var formattedDate = FormatDate(item.Date);
-        var tooltip = $"{item.Name}: {formattedDate}";
-        var js = $"var tooltip = document.getElementById('tooltip'); tooltip.style.display = 'block'; tooltip.style.left = '{e.ClientX + 15}px'; tooltip.style.top = '{e.ClientY + 15}px'; tooltip.textContent = '{tooltip}';";
-        await JSRuntime.InvokeVoidAsync("eval", js);
+        if (DateTime.TryParseExact(item.Date, "yyyyMMddHHmm", null, System.Globalization.DateTimeStyles.None, out DateTime birthDate))
+        {
+            var ageInfo = AgeCalculator.FormatAgeInPolish(item.Name, birthDate);
+            var js = $"var tooltip = document.getElementById('tooltip'); tooltip.style.display = 'block'; tooltip.style.left = '{e.ClientX + 15}px'; tooltip.style.top = '{e.ClientY + 15}px'; tooltip.textContent = '{ageInfo}';";
+            await JSRuntime.InvokeVoidAsync("eval", js);
+        }
     }
 
     private async Task HideTooltip()

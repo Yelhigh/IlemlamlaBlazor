@@ -1,6 +1,7 @@
 using IlemlamlaBlazor.Components;
 using IlemlamlaBlazor.Interfaces;
 using IlemlamlaBlazor.Services;
+using IlemlamlaBlazor.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<IBirthdayDataService, BirthdayDataService>();
+builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+builder.Services.AddScoped<IAgeCalculator, AgeCalculator>();
+builder.Services.AddScoped<IPolishPluralizer, PolishPluralizer>();
 builder.Services.AddMemoryCache();
 
 // Add HttpClient to the service container
