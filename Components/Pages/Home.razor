@@ -25,13 +25,11 @@
         border: 1px solid #ddd; /* Subtle border */
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         border-radius: 15px;
-        transform: perspective(1000px) rotateX(2deg);
-        transform-style: preserve-3d;
-        transition: transform 0.3s ease;
+        transition: box-shadow 0.3s ease;
     }
 
     .paper-container:hover {
-        transform: perspective(1000px) rotateX(0deg);
+        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.15);
     }
 
     h1 {
@@ -119,7 +117,6 @@
                 @foreach (var item in birthdayItems)
                 {
                     <tr class="fancy-row" @onmousemove="@(e => ShowTooltip(e, item))" @onmouseout="HideTooltip">
-                        <td>@item.Name</td>
                         <td>@GetAgeInfo(item)</td>
                     </tr>
                 }
