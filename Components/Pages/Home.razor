@@ -1,7 +1,9 @@
 ﻿@page "/"
 @using IlemlamlaBlazor.Interfaces
 @using IlemlamlaBlazor.Models
+@using Microsoft.JSInterop
 @inject IBirthdayDataService BirthdayDataService
+@inject IJSRuntime JSRuntime
 
 <style>
     body {
@@ -18,37 +20,73 @@
         background-color: #fff; /* White paper background */
         padding: 30px;
         border: 1px solid #ddd; /* Subtle border */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for depth */
-        border-radius: 8px; /* Rounded corners */
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        transform: perspective(1000px) rotateX(2deg);
+        transform-style: preserve-3d;
+        transition: transform 0.3s ease;
+    }
+
+    .paper-container:hover {
+        transform: perspective(1000px) rotateX(0deg);
     }
 
     h1 {
         color: #4A90E2;
         text-align: center;
-        margin-bottom: 20px;
-        font-size: 2.5rem; /* Larger heading */
+        margin-bottom: 30px;
+        font-size: 2.8rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    .table {
+    .fancy-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0 6px;
         margin-top: 20px;
     }
 
-        .table th, .table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #ddd; /* Subtle border for rows */
-        }
+    .fancy-row {
+        position: relative;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
 
-        .table th {
-            background-color: #f9f9f9; /* Light gray header */
-            font-weight: bold;
-        }
+    .fancy-row td {
+        padding: 8px 20px;
+        background-color: #ffffff;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: all 0.3s ease;
+    }
 
-        .table tbody tr:hover {
-            background-color: #f1f1f1; /* Hover effect */
-        }
+    .fancy-row td:first-child {
+        border-radius: 10px 0 0 10px;
+    }
+
+    .fancy-row td:last-child {
+        border-radius: 0 10px 10px 0;
+    }
+
+    .fancy-row:hover td {
+        background-color: #FFD700; /* Yellow background */
+        color: #000000; /* Black text */
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-tooltip {
+        position: fixed;
+        padding: 10px 15px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        border-radius: 6px;
+        font-size: 14px;
+        pointer-events: none;
+        z-index: 1000;
+        display: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
 
     .loading {
         text-align: center;
@@ -60,23 +98,19 @@
 <div class="paper-container">
     <h1>ILEMLAMLA</h1>
 
+    <div class="custom-tooltip" id="tooltip"></div>
+
     @if (birthdayItems == null)
     {
         <p class="loading">Loading...</p>
     }
     else
     {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Kto</th>
-                    <th>Ilemlamla</th>
-                </tr>
-            </thead>
+        <table class="fancy-table">
             <tbody>
                 @foreach (var item in birthdayItems)
                 {
-                    <tr>
+                    <tr class="fancy-row" @onmousemove="@(e => ShowTooltip(e, item))" @onmouseout="HideTooltip">
                         <td>@item.Name</td>
                         <td>@FormatDate(item.Date)</td>
                     </tr>
@@ -101,5 +135,18 @@
             return date.ToString("yyyy-MM-dd HH:mm");
         }
         return dateString;
+    }
+
+    private async Task ShowTooltip(MouseEventArgs e, BirthdayItem item)
+    {
+        var formattedDate = FormatDate(item.Date);
+        var tooltip = $"{item.Name}: {formattedDate}";
+        var js = $"var tooltip = document.getElementById('tooltip'); tooltip.style.display = 'block'; tooltip.style.left = '{e.ClientX + 15}px'; tooltip.style.top = '{e.ClientY + 15}px'; tooltip.textContent = '{tooltip}';";
+        await JSRuntime.InvokeVoidAsync("eval", js);
+    }
+
+    private async Task HideTooltip()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", "document.getElementById('tooltip').style.display = 'none';");
     }
 }
