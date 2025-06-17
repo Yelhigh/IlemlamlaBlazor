@@ -14,11 +14,13 @@ namespace IlemlamlaBlazor.Extensions
         {
             var accessKey = configuration["AWS:AccessKey"] ?? Environment.GetEnvironmentVariable("AWS_ACCESS_KEY");
             var secretKey = configuration["AWS:SecretKey"] ?? Environment.GetEnvironmentVariable("AWS_SECRET_KEY");
-            var region = configuration["AWS:Region"] ?? Environment.GetEnvironmentVariable("AWS_REGION") ?? "eu-north-1";
+            var region = configuration["AWS:Region"] ?? Environment.GetEnvironmentVariable("AWS_REGION");
 
             if (string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(secretKey))
             {
                 Console.WriteLine("Warning: AWS credentials not found in configuration or environment variables. AWS services will not be available.");
+                
+                services.AddSingleton<IAmazonDynamoDB>(sp => null);
                 return services;
             }
 
