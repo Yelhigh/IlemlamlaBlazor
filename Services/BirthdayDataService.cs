@@ -1,6 +1,5 @@
 ﻿using IlemlamlaBlazor.Interfaces;
 using IlemlamlaBlazor.Models;
-using Microsoft.Extensions.Logging;
 
 namespace IlemlamlaBlazor.Services
 {
@@ -8,6 +7,7 @@ namespace IlemlamlaBlazor.Services
     {
         private readonly IDataSourceStrategyFactory _strategyFactory;
         private readonly ILogger<BirthdayDataService> _logger;
+        private IDataSourceStrategy _currentStrategy;
 
         public BirthdayDataService(
             IDataSourceStrategyFactory strategyFactory,
@@ -21,9 +21,9 @@ namespace IlemlamlaBlazor.Services
         {
             try
             {
-                var strategy = await _strategyFactory.GetStrategyAsync();
-                var data = await strategy.GetDataAsync();
-                _logger.LogInformation($"Retrieved {data.Count} items from {strategy.SourceName}");
+                _currentStrategy = await _strategyFactory.GetStrategyAsync();
+                var data = await _currentStrategy.GetDataAsync();
+                _logger.LogInformation($"Retrieved {data.Count} items from {_currentStrategy.SourceName}");
                 return data;
             }
             catch (Exception ex)
@@ -37,8 +37,8 @@ namespace IlemlamlaBlazor.Services
         {
             try
             {
-                var strategy = await _strategyFactory.GetStrategyAsync();
-                return await strategy.HasDataAsync();
+                _currentStrategy = await _strategyFactory.GetStrategyAsync();
+                return await _currentStrategy.HasDataAsync();
             }
             catch (Exception ex)
             {
@@ -51,8 +51,8 @@ namespace IlemlamlaBlazor.Services
         {
             try
             {
-                var strategy = await _strategyFactory.GetStrategyAsync();
-                var data = await strategy.GetDataAsync();
+                _currentStrategy = await _strategyFactory.GetStrategyAsync();
+                var data = await _currentStrategy.GetDataAsync();
                 return data.FirstOrDefault(item => item.Position == id);
             }
             catch (Exception ex)
@@ -60,6 +60,15 @@ namespace IlemlamlaBlazor.Services
                 _logger.LogError(ex, $"Error retrieving birthday item with id {id}");
                 return null;
             }
+        }
+
+        public async Task<string> GetCurrentSourceNameAsync()
+        {
+            if (_currentStrategy == null)
+            {
+                _currentStrategy = await _strategyFactory.GetStrategyAsync();
+            }
+            return _currentStrategy.SourceName;
         }
     }
 }

@@ -7,5 +7,6 @@ namespace IlemlamlaBlazor.Interfaces
         Task<List<BirthdayItem>> GetBirthdayItemsAsync();
         Task<bool> HasDataAsync();
         Task<BirthdayItem> GetBirthdayItemAsync(string id);
+        Task<string> GetCurrentSourceNameAsync();
     }
 }

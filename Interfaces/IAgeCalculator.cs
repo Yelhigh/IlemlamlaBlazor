@@ -1,4 +1,3 @@
-using System;
 using IlemlamlaBlazor.Models;
 
 namespace IlemlamlaBlazor.Interfaces
