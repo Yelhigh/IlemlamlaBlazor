@@ -7,6 +7,10 @@
 @inject IAgeCalculator AgeCalculator
 @inject IJSRuntime JSRuntime
 
+<PageTitle>Ilemlamla</PageTitle>
+
+@implements IDisposable
+
 <style>
     body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; /* Professional font stack */
@@ -84,7 +88,7 @@
     .custom-tooltip {
         position: fixed;
         padding: 10px 15px;
-        background: rgba(0, 0, 0, 0.8);
+        background: #333;
         color: white;
         border-radius: 6px;
         font-size: 14px;
@@ -92,6 +96,8 @@
         z-index: 1000;
         display: none;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        white-space: nowrap;
+        border: 2px solid #FFD700;
     }
 
     .loading {
@@ -99,12 +105,30 @@
         color: #4A90E2;
         font-size: 1.2rem;
     }
+
+    .tooltip-container {
+        position: relative;
+    }
+
+    .tooltip-text {
+        position: absolute;
+        background-color: #333;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        z-index: 1000;
+        white-space: nowrap;
+        border: 2px solid #FFD700;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        top: -40px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 </style>
 
 <div class="paper-container">
     <h1><img src="logunio.png" alt="Logunio" class="logo-image" /></h1>
-
-    <div class="custom-tooltip" id="tooltip"></div>
 
     @if (birthdayItems == null)
     {
@@ -116,8 +140,19 @@
             <tbody>
                 @foreach (var item in birthdayItems)
                 {
-                    <tr class="fancy-row" @onmousemove="@(e => ShowTooltip(e, item))" @onmouseout="HideTooltip">
-                        <td>@GetAgeInfo(item)</td>
+                    <tr class="fancy-row tooltip-container">
+                        <td @onclick="() => ToggleTooltip(item)">
+                            @GetAgeInfo(item)
+                            @if (selectedItem == item)
+                            {
+                                <div class="tooltip-text">
+                                    @if (DateTime.TryParseExact(item.Date, "yyyyMMddHHmm", null, System.Globalization.DateTimeStyles.None, out DateTime birthDate))
+                                    {
+                                        @($"{item.Name}: {birthDate:dd.MM.yyyy HH:mm}")
+                                    }
+                                </div>
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -127,10 +162,33 @@
 
 @code {
     private List<BirthdayItem> birthdayItems;
+    private BirthdayItem selectedItem;
+    private System.Threading.Timer tooltipTimer;
 
     protected override async Task OnInitializedAsync()
     {
         birthdayItems = await BirthdayDataService.GetBirthdayItemsAsync();
+    }
+
+    private void ToggleTooltip(BirthdayItem item)
+    {
+        if (selectedItem == item)
+        {
+            selectedItem = null;
+        }
+        else
+        {
+            selectedItem = item;
+            tooltipTimer?.Dispose();
+            tooltipTimer = new System.Threading.Timer(_ =>
+            {
+                InvokeAsync(() =>
+                {
+                    selectedItem = null;
+                    StateHasChanged();
+                });
+            }, null, 3000, Timeout.Infinite);
+        }
     }
 
     private string GetAgeInfo(BirthdayItem item)
@@ -142,18 +200,8 @@
         return "Nieprawidłowa data";
     }
 
-    private async Task ShowTooltip(MouseEventArgs e, BirthdayItem item)
+    public void Dispose()
     {
-        if (DateTime.TryParseExact(item.Date, "yyyyMMddHHmm", null, System.Globalization.DateTimeStyles.None, out DateTime birthDate))
-        {
-            var ageInfo = AgeCalculator.FormatAgeInPolish(item.Name, birthDate);
-            var js = $"var tooltip = document.getElementById('tooltip'); tooltip.style.display = 'block'; tooltip.style.left = '{e.ClientX + 15}px'; tooltip.style.top = '{e.ClientY + 15}px'; tooltip.textContent = '{ageInfo}';";
-            await JSRuntime.InvokeVoidAsync("eval", js);
-        }
-    }
-
-    private async Task HideTooltip()
-    {
-        await JSRuntime.InvokeVoidAsync("eval", "document.getElementById('tooltip').style.display = 'none';");
+        tooltipTimer?.Dispose();
     }
 }
