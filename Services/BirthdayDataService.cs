@@ -1,6 +1,5 @@
 ﻿using IlemlamlaBlazor.Interfaces;
 using IlemlamlaBlazor.Models;
-using Microsoft.Extensions.Logging;
 
 namespace IlemlamlaBlazor.Services
 {

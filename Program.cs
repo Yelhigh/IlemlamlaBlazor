@@ -3,13 +3,8 @@ using IlemlamlaBlazor.Interfaces;
 using IlemlamlaBlazor.Services;
 using IlemlamlaBlazor.Services.Strategies;
 using IlemlamlaBlazor.Utils;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Azure.Identity;
 using IlemlamlaBlazor.Extensions;
-using Azure.Extensions.AspNetCore.Configuration.Secrets;
-using Azure.Data.AppConfiguration;
 
 var builder = WebApplication.CreateBuilder(args);
 

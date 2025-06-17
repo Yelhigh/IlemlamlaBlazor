@@ -1,6 +1,5 @@
 using IlemlamlaBlazor.Interfaces;
 using IlemlamlaBlazor.Models;
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace IlemlamlaBlazor.Services.Strategies

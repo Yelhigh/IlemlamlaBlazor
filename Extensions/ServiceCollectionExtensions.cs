@@ -3,8 +3,6 @@ using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
 using IlemlamlaBlazor.Interfaces;
 using IlemlamlaBlazor.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace IlemlamlaBlazor.Extensions
 {

@@ -1,6 +1,5 @@
 using IlemlamlaBlazor.Interfaces;
 using IlemlamlaBlazor.Services.Strategies;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace IlemlamlaBlazor.Services
 {
