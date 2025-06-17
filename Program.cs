@@ -12,20 +12,33 @@ using Azure.Extensions.AspNetCore.Configuration.Secrets;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Azure Key Vault configuration if available
-var vaultUri = Environment.GetEnvironmentVariable("VaultUri");
-if (!string.IsNullOrEmpty(vaultUri))
+// Add Azure Key Vault configuration
+try
 {
-    try
+    var keyVaultEndpoint = new Uri("https://smaczki.vault.azure.net/");
+
+    var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
     {
-        var keyVaultEndpoint = new Uri(vaultUri);
-        builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
-    }
-    catch (Exception ex)
-    {
-        // Log the error but continue without Key Vault
-        Console.WriteLine($"Warning: Could not configure Azure Key Vault: {ex.Message}");
-    }
+        ExcludeEnvironmentCredential = false,
+        ExcludeManagedIdentityCredential = false,
+        ExcludeSharedTokenCacheCredential = true,
+        ExcludeAzureCliCredential = false,
+        ExcludeVisualStudioCredential = true,
+        ExcludeInteractiveBrowserCredential = true,
+        ExcludeAzureDeveloperCliCredential = true,
+        ExcludeWorkloadIdentityCredential = true
+    });
+
+    builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, credential);
+    
+    // Configure AWS credentials from Key Vault
+    builder.Configuration["AWS:AccessKey"] = builder.Configuration["aws-access-key"];
+    builder.Configuration["AWS:SecretKey"] = builder.Configuration["aws-secret-key"];
+}
+catch (Exception ex)
+{
+    // Log the error but continue without Key Vault
+    Console.WriteLine($"Warning: Could not configure Azure Key Vault: {ex.Message}");
 }
 
 // Add services to the container.

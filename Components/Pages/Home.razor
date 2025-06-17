@@ -46,10 +46,15 @@
     }
 </div>
 
+<div class="source-info">
+    Source: @currentSource
+</div>
+
 @code {
     private List<BirthdayItem> birthdayItems;
     private BirthdayItem selectedItem;
     private System.Threading.Timer tooltipTimer;
+    private string currentSource;
 
     private List<(BirthdayItem Item, string AgeInfo)> ValidBirthdayItems => 
         birthdayItems?
@@ -60,6 +65,7 @@
     protected override async Task OnInitializedAsync()
     {
         birthdayItems = await BirthdayDataService.GetBirthdayItemsAsync();
+        currentSource = await BirthdayDataService.GetCurrentSourceNameAsync();
     }
 
     private void ToggleTooltip(BirthdayItem item)

@@ -19,7 +19,6 @@ namespace IlemlamlaBlazor.Extensions
             if (string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(secretKey))
             {
                 Console.WriteLine("Warning: AWS credentials not found in configuration or environment variables. AWS services will not be available.");
-                
                 services.AddSingleton<IAmazonDynamoDB>(sp => null);
                 return services;
             }
