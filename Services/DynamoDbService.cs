@@ -25,6 +25,11 @@ namespace IlemlamlaBlazor.Services
         {
             try
             {
+                if (_dynamoDbClient == null)
+                {
+                    return false;
+                }
+
                 var request = new ScanRequest
                 {
                     TableName = TableName,
@@ -45,6 +50,11 @@ namespace IlemlamlaBlazor.Services
         {
             try
             {
+                if (_dynamoDbClient == null)
+                {
+                    return new List<DynamoBirthdayItem>();
+                }
+
                 var request = new ScanRequest
                 {
                     TableName = TableName

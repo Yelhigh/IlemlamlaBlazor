@@ -42,6 +42,10 @@ namespace IlemlamlaBlazor.Utils
         public string FormatAgeInPolish(string name, DateTime birthDate)
         {
             var age = CalculateAge(birthDate);
+            var yearsFormatted = age.Years < 1 
+                ? $"{age.Years:N2}" 
+                : $"{(int)age.Years}";
+
             return $"{name} ma: " +
                    $"{age.Milliseconds:N0} {_pluralizer.PluralizeMilliseconds(age.Milliseconds)}, " +
                    $"{age.Seconds:N0} {_pluralizer.PluralizeSeconds(age.Seconds)}, " +
@@ -50,7 +54,7 @@ namespace IlemlamlaBlazor.Utils
                    $"{age.Days:N0} {_pluralizer.PluralizeDays(age.Days)}, " +
                    $"{age.Weeks:N0} {_pluralizer.PluralizeWeeks(age.Weeks)}, " +
                    $"{age.Months:N0} {_pluralizer.PluralizeMonths(age.Months)} lub " +
-                   $"{age.Years:N2} {_pluralizer.PluralizeYears(age.Years)}.";
+                   $"{yearsFormatted} {_pluralizer.PluralizeYears(age.Years)}.";
         }
     }
 } 
