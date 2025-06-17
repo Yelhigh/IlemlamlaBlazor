@@ -5,8 +5,27 @@ using IlemlamlaBlazor.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Azure.Identity;
+using IlemlamlaBlazor.Extensions;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add Azure Key Vault configuration if available
+var vaultUri = Environment.GetEnvironmentVariable("VaultUri");
+if (!string.IsNullOrEmpty(vaultUri))
+{
+    try
+    {
+        var keyVaultEndpoint = new Uri(vaultUri);
+        builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
+    }
+    catch (Exception ex)
+    {
+        // Log the error but continue without Key Vault
+        Console.WriteLine($"Warning: Could not configure Azure Key Vault: {ex.Message}");
+    }
+}
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -23,6 +42,10 @@ builder.Services.AddHttpClient();
 // Add Razor Components and enable interactive server-side rendering
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Add AWS services - will fall back to file-based data if AWS is not available
+builder.Services.AddAwsServices(builder.Configuration);
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 

@@ -10,17 +10,20 @@ namespace IlemlamlaBlazor.Services
         private readonly string _dataFilePath;
         private readonly IMemoryCache _cache;
         private readonly ILogger<BirthdayDataService> _logger;
+        private readonly IDynamoDbService _dynamoDbService;
         private const string CacheKey = "BirthdayItems";
         private readonly MemoryCacheEntryOptions _cacheOptions;
 
         public BirthdayDataService(
             IWebHostEnvironment webHostEnvironment,
             IMemoryCache memoryCache,
-            ILogger<BirthdayDataService> logger)
+            ILogger<BirthdayDataService> logger,
+            IDynamoDbService dynamoDbService)
         {
             _dataFilePath = Path.Combine(webHostEnvironment.WebRootPath, "data.json");
             _cache = memoryCache;
             _logger = logger;
+            _dynamoDbService = dynamoDbService;
             _cacheOptions = new MemoryCacheEntryOptions()
                 .SetSlidingExpiration(TimeSpan.FromMinutes(5))
                 .SetAbsoluteExpiration(TimeSpan.FromHours(1));
@@ -35,6 +38,35 @@ namespace IlemlamlaBlazor.Services
                     return cachedItems;
                 }
 
+                // Try to get data from DynamoDB
+                try
+                {
+                    if (await _dynamoDbService.HasDataAsync())
+                    {
+                        var dynamoItems = await _dynamoDbService.GetBirthdayItemsAsync();
+                        var birthdayItems = dynamoItems.Select(item => new BirthdayItem
+                        {
+                            Name = item.Name,
+                            Date = item.Date,
+                            Position = item.Position
+                        }).ToList();
+
+                        var sortedItems = birthdayItems
+                            .Select(x => new { Item = x, Position = int.TryParse(x.Position, out var pos) ? pos : int.MaxValue })
+                            .OrderBy(x => x.Position)
+                            .Select(x => x.Item)
+                            .ToList();
+
+                        _cache.Set(CacheKey, sortedItems, _cacheOptions);
+                        return sortedItems;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to retrieve data from DynamoDB, falling back to file-based data");
+                }
+
+                // Fallback to file-based data
                 if (!File.Exists(_dataFilePath))
                 {
                     _logger.LogError("Data file not found at path: {FilePath}", _dataFilePath);
@@ -50,15 +82,15 @@ namespace IlemlamlaBlazor.Services
                     return new List<BirthdayItem>();
                 }
 
-                var sortedItems = data.List
+                var fileSortedItems = data.List
                     .Select(x => new { Item = x, Position = int.TryParse(x.Position, out var pos) ? pos : int.MaxValue })
                     .OrderBy(x => x.Position)
                     .Select(x => x.Item)
                     .ToList();
 
-                _cache.Set(CacheKey, sortedItems, _cacheOptions);
+                _cache.Set(CacheKey, fileSortedItems, _cacheOptions);
 
-                return sortedItems;
+                return fileSortedItems;
             }
             catch (JsonException ex)
             {
