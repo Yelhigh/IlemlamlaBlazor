@@ -1,6 +1,7 @@
 using IlemlamlaBlazor.Components;
 using IlemlamlaBlazor.Interfaces;
 using IlemlamlaBlazor.Services;
+using IlemlamlaBlazor.Services.Strategies;
 using IlemlamlaBlazor.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,6 +47,11 @@ builder.Services.AddRazorComponents()
 // Add AWS services - will fall back to file-based data if AWS is not available
 builder.Services.AddAwsServices(builder.Configuration);
 builder.Services.AddApplicationServices();
+
+builder.Services.AddSingleton<IDataSourceStrategy, DynamoDbStrategy>();
+builder.Services.AddSingleton<IDataSourceStrategy, CachedDataStrategy>();
+builder.Services.AddSingleton<IDataSourceStrategy, FileSystemStrategy>();
+builder.Services.AddSingleton<IDataSourceStrategyFactory, DataSourceStrategyFactory>();
 
 var app = builder.Build();
 
