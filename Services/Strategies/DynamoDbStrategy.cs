@@ -46,9 +46,9 @@ namespace IlemlamlaBlazor.Services.Strategies
                     {
                         return new BirthdayItem
                         {
-                            Name = item["Name"].S,
-                            Date = item["Date"].S,
-                            Position = int.Parse(item["Position"].N)
+                            Name = item[nameof(BirthdayItem.Name)].S,
+                            Date = item[nameof(BirthdayItem.Date)].S,
+                            Position = int.Parse(item[nameof(BirthdayItem.Position)].N)
                         };
                     }
                     catch (KeyNotFoundException ex)
@@ -58,7 +58,23 @@ namespace IlemlamlaBlazor.Services.Strategies
                     }
                     catch (FormatException ex)
                     {
-                        _logger.LogWarning("Invalid Position format in DynamoDB item: {Position}, Error: {Error}", item["Position"].N, ex.Message);
+                        _logger.LogWarning("Invalid Position format in DynamoDB item: {Position}, Error: {Error}", item[nameof(BirthdayItem.Position)].N, ex.Message);
+                        return null;
+                    }
+                    catch (AmazonDynamoDBException ex)
+                    {
+                        if (ex.ErrorCode == AwsErrorCodes.ResourceNotFoundException)
+                        {
+                            _logger.LogError("DynamoDB table '{TableName}' does not exist", TableName);
+                        }
+                        else if (ex.ErrorCode == AwsErrorCodes.AccessDeniedException)
+                        {
+                            _logger.LogError("Access denied to DynamoDB table '{TableName}'. Check AWS credentials and permissions", TableName);
+                        }
+                        else if (ex.ErrorCode == AwsErrorCodes.ProvisionedThroughputExceededException)
+                        {
+                            _logger.LogWarning("DynamoDB table '{TableName}' exceeded provisioned throughput", TableName);
+                        }
                         return null;
                     }
                 }).Where(x => x != null).OrderBy(x => x.Position).ToList();
