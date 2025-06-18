@@ -13,4 +13,11 @@ namespace IlemlamlaBlazor.Models
         Found,
         NotFound
     }
+
+    public static class AwsErrorCodes
+    {
+        public const string ResourceNotFoundException = "ResourceNotFoundException";
+        public const string AccessDeniedException = "AccessDeniedException";
+        public const string ProvisionedThroughputExceededException = "ProvisionedThroughputExceededException";
+    }
 } 

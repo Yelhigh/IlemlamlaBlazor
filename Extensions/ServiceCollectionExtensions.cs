@@ -20,7 +20,6 @@ namespace IlemlamlaBlazor.Extensions
             {
                 var logger = services.BuildServiceProvider().GetService<ILogger<IServiceCollection>>();
                 logger?.LogWarning("AWS credentials not found in configuration or environment variables. AWS services will not be available.");
-                services.AddSingleton<IAmazonDynamoDB>(sp => null);
                 return services;
             }
 

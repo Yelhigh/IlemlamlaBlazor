@@ -7,7 +7,7 @@ namespace IlemlamlaBlazor.Services
     {
         private readonly IDataSourceStrategyFactory _strategyFactory;
         private readonly ILogger<BirthdayDataService> _logger;
-        private IDataSourceStrategy _currentStrategy;
+        private IDataSourceStrategy? _currentStrategy;
 
         public BirthdayDataService(
             IDataSourceStrategyFactory strategyFactory,

@@ -37,11 +37,12 @@ namespace IlemlamlaBlazor.Services.Strategies
                 
                 var tempData = JsonSerializer.Deserialize<JsonElement>(json);
                 var listElement = tempData.GetProperty(JsonListField);
-                var enumerateArray = listElement.EnumerateArray();
                 var items = new List<BirthdayItem>();
+                var itemCount = 0;
 
-                foreach (var item in enumerateArray)
+                foreach (var item in listElement.EnumerateArray())
                 {
+                    itemCount++;
                     try
                     {
                         var name = item.GetProperty(nameof(BirthdayItem.Name)).GetString() ?? string.Empty;
@@ -64,7 +65,7 @@ namespace IlemlamlaBlazor.Services.Strategies
                             {
                                 Name = name,
                                 Date = date,
-                                Position = enumerateArray.Count() + 2
+                                Position = itemCount + 1
                             });
                         }
                     }
