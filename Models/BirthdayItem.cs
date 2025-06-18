@@ -2,9 +2,8 @@
 {
     public class BirthdayItem
     {
-        public string Name { get; set; }
-        public string Date { get; set; }
-        public string Position { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Date { get; set; } = string.Empty;
+        public string Position { get; set; } = string.Empty;
     }
-
 }

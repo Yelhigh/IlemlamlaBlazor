@@ -2,6 +2,6 @@
 {
     public class BirthdayData
     {
-        public List<BirthdayItem> List { get; set; }
+        public List<BirthdayItem> List { get; set; } = new List<BirthdayItem>();
     }
 }

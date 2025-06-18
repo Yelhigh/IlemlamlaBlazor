@@ -12,7 +12,7 @@ namespace IlemlamlaBlazor.Extensions
         {
             var accessKey = configuration["aws-access-key"] ?? Environment.GetEnvironmentVariable("AWS_ACCESS_KEY");
             var secretKey = configuration["aws-secret-key"] ?? Environment.GetEnvironmentVariable("AWS_SECRET_KEY");
-            var region = configuration["AWS:Region"] ?? Environment.GetEnvironmentVariable("AWS_REGION") ?? "eu-central-1";
+            var region = configuration["AWS:Region"];
 
             if (string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(secretKey))
             {
