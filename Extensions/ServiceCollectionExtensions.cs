@@ -26,7 +26,7 @@ namespace IlemlamlaBlazor.Extensions
 
             var awsOptions = new AWSOptions
             {
-                Region = Amazon.RegionEndpoint.GetBySystemName(region),
+                Region = Amazon.RegionEndpoint.GetBySystemName(region ?? "eu-north-1"),
                 Credentials = new BasicAWSCredentials(accessKey, secretKey)
             };
             
@@ -38,7 +38,7 @@ namespace IlemlamlaBlazor.Extensions
             return services;
         }
 
-        private static (string value, CredentialSourceType source) GetCredentialWithSource(IConfiguration configuration, string configKey, string envKey, CredentialSourceType configSourceType)
+        private static (string? value, CredentialSourceType source) GetCredentialWithSource(IConfiguration configuration, string configKey, string envKey, CredentialSourceType configSourceType)
         {
             var value = configuration[configKey];
             if (!string.IsNullOrEmpty(value))
@@ -51,9 +51,9 @@ namespace IlemlamlaBlazor.Extensions
         }
 
         private static void LogCredentialSources(IServiceCollection services, 
-            string accessKey, CredentialSourceType accessKeySource,
-            string secretKey, CredentialSourceType secretKeySource,
-            string region, CredentialSourceType regionSource)
+            string? accessKey, CredentialSourceType accessKeySource,
+            string? secretKey, CredentialSourceType secretKeySource,
+            string? region, CredentialSourceType regionSource)
         {
             var logger = services.BuildServiceProvider().GetService<ILogger<IServiceCollection>>();
             logger?.LogInformation("AWS AccessKey: {Status} (from {Source})", 
