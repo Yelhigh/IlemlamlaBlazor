@@ -105,13 +105,17 @@ namespace IlemlamlaBlazor.Services
                         {
                             Name = item["Name"].S,
                             Date = item["Date"].S,
-                            Position = item["Position"].N
+                            Position = int.Parse(item["Position"].N)
                         };
                         items.Add(birthdayItem);
                     }
                     catch (KeyNotFoundException ex)
                     {
                         _logger.LogWarning("Missing required field in DynamoDB item: {FieldName}", ex.Message);
+                    }
+                    catch (FormatException ex)
+                    {
+                        _logger.LogWarning("Invalid Position format in DynamoDB item: {Position}, Error: {Error}", item["Position"].N, ex.Message);
                     }
                 }
 

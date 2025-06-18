@@ -11,6 +11,6 @@ namespace IlemlamlaBlazor.Models
         public string Date { get; set; } = string.Empty;
 
         [JsonPropertyName("Position")]
-        public string Position { get; set; } = string.Empty;
+        public int Position { get; set; }
     }
 } 

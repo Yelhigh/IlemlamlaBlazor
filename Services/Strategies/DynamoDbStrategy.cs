@@ -48,12 +48,17 @@ namespace IlemlamlaBlazor.Services.Strategies
                         {
                             Name = item["Name"].S,
                             Date = item["Date"].S,
-                            Position = item["Position"].N
+                            Position = int.Parse(item["Position"].N)
                         };
                     }
                     catch (KeyNotFoundException ex)
                     {
                         _logger.LogWarning("Missing required field in DynamoDB item: {FieldName}", ex.Message);
+                        return null;
+                    }
+                    catch (FormatException ex)
+                    {
+                        _logger.LogWarning("Invalid Position format in DynamoDB item: {Position}, Error: {Error}", item["Position"].N, ex.Message);
                         return null;
                     }
                 }).Where(x => x != null).OrderBy(x => x.Position).ToList();

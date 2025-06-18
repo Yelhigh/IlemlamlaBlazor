@@ -47,21 +47,6 @@ namespace IlemlamlaBlazor.Services
             }
         }
 
-        public async Task<BirthdayItem> GetBirthdayItemAsync(string id)
-        {
-            try
-            {
-                _currentStrategy = await _strategyFactory.GetStrategyAsync();
-                var data = await _currentStrategy.GetDataAsync();
-                return data.FirstOrDefault(item => item.Position == id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error retrieving birthday item with id {id}");
-                return null;
-            }
-        }
-
         public async Task<string> GetCurrentSourceNameAsync()
         {
             if (_currentStrategy == null)
