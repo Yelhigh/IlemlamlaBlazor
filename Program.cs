@@ -5,8 +5,16 @@ using IlemlamlaBlazor.Services.Strategies;
 using IlemlamlaBlazor.Utils;
 using Azure.Identity;
 using IlemlamlaBlazor.Extensions;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 try
 {
@@ -25,7 +33,7 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Warning: Could not configure Azure App Configuration: {ex.Message}");
+    Log.Warning("Could not configure Azure App Configuration: {Message}", ex.Message);
 }
 
 try
@@ -50,7 +58,7 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Warning: Could not configure Azure Key Vault: {ex.Message}");
+    Log.Warning("Could not configure Azure Key Vault: {Message}", ex.Message);
 }
 
 builder.Services.AddRazorPages();
@@ -81,4 +89,17 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
-app.Run();
+
+try
+{
+    Log.Information("Starting IlemlamlaBlazor application");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

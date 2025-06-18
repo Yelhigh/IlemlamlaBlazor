@@ -3,6 +3,7 @@ using Amazon.Extensions.NETCore.Setup;
 using Amazon.Runtime;
 using IlemlamlaBlazor.Interfaces;
 using IlemlamlaBlazor.Services;
+using Microsoft.Extensions.Logging;
 
 namespace IlemlamlaBlazor.Extensions
 {
@@ -16,7 +17,8 @@ namespace IlemlamlaBlazor.Extensions
 
             if (string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(secretKey))
             {
-                Console.WriteLine("Warning: AWS credentials not found in configuration or environment variables. AWS services will not be available.");
+                var logger = services.BuildServiceProvider().GetService<ILogger<IServiceCollection>>();
+                logger?.LogWarning("AWS credentials not found in configuration or environment variables. AWS services will not be available.");
                 services.AddSingleton<IAmazonDynamoDB>(sp => null);
                 return services;
             }
