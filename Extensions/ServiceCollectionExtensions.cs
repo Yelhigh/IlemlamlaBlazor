@@ -16,8 +16,6 @@ namespace IlemlamlaBlazor.Extensions
             var (secretKey, secretKeySource) = GetCredentialWithSource(configuration, "aws-secret-key", "AWS_SECRET_KEY", CredentialSourceType.AwsKeyVault);
             var (region, regionSource) = GetCredentialWithSource(configuration, "AWS:Region", "AWS_REGION", CredentialSourceType.Configuration);
 
-            accessKey = null;
-            secretKey = null;
             if (string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(secretKey))
             {
                 var logger = services.BuildServiceProvider().GetService<ILogger<IServiceCollection>>();
@@ -58,9 +56,12 @@ namespace IlemlamlaBlazor.Extensions
             string region, CredentialSourceType regionSource)
         {
             var logger = services.BuildServiceProvider().GetService<ILogger<IServiceCollection>>();
-            logger?.LogInformation("AWS AccessKey: {Status} (from {Source})", string.IsNullOrEmpty(accessKey) ? "NOT FOUND" : "FOUND", accessKeySource);
-            logger?.LogInformation("AWS SecretKey: {Status} (from {Source})", string.IsNullOrEmpty(secretKey) ? "NOT FOUND" : "FOUND", secretKeySource);
-            logger?.LogInformation("AWS Region: {Status} (from {Source})", string.IsNullOrEmpty(region) ? "NOT FOUND" : "FOUND", regionSource);
+            logger?.LogInformation("AWS AccessKey: {Status} (from {Source})", 
+                string.IsNullOrEmpty(accessKey) ? CredentialStatus.NotFound : CredentialStatus.Found, accessKeySource);
+            logger?.LogInformation("AWS SecretKey: {Status} (from {Source})", 
+                string.IsNullOrEmpty(secretKey) ? CredentialStatus.NotFound : CredentialStatus.Found, secretKeySource);
+            logger?.LogInformation("AWS Region: {Status} (from {Source})", 
+                string.IsNullOrEmpty(region) ? CredentialStatus.NotFound : CredentialStatus.Found, regionSource);
         }
 
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)

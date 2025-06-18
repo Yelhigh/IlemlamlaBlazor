@@ -10,6 +10,8 @@ namespace IlemlamlaBlazor.Services.Strategies
         private readonly ILogger<FileSystemStrategy> _logger;
         private readonly string _dataFilePath;
 
+        private const string JsonListField = "List";
+
         public string SourceName => "File System";
 
         public FileSystemStrategy(
@@ -34,7 +36,7 @@ namespace IlemlamlaBlazor.Services.Strategies
                 var json = await File.ReadAllTextAsync(_dataFilePath);
                 
                 var tempData = JsonSerializer.Deserialize<JsonElement>(json);
-                var listElement = tempData.GetProperty("List");
+                var listElement = tempData.GetProperty(JsonListField);
                 var enumerateArray = listElement.EnumerateArray();
                 var items = new List<BirthdayItem>();
 
@@ -42,9 +44,9 @@ namespace IlemlamlaBlazor.Services.Strategies
                 {
                     try
                     {
-                        var name = item.GetProperty("Name").GetString() ?? string.Empty;
-                        var date = item.GetProperty("Date").GetString() ?? string.Empty;
-                        var positionStr = item.GetProperty("Position").GetString() ?? "0";
+                        var name = item.GetProperty(nameof(BirthdayItem.Name)).GetString() ?? string.Empty;
+                        var date = item.GetProperty(nameof(BirthdayItem.Date)).GetString() ?? string.Empty;
+                        var positionStr = item.GetProperty(nameof(BirthdayItem.Position)).GetString() ?? "0";
                         
                         if (int.TryParse(positionStr, out int position))
                         {
@@ -102,7 +104,7 @@ namespace IlemlamlaBlazor.Services.Strategies
 
                 var json = await File.ReadAllTextAsync(_dataFilePath);
                 var data = JsonSerializer.Deserialize<JsonElement>(json);
-                return data.TryGetProperty("List", out var listElement) && listElement.GetArrayLength() > 0;
+                return data.TryGetProperty(JsonListField, out var listElement) && listElement.GetArrayLength() > 0;
             }
             catch (Exception ex)
             {

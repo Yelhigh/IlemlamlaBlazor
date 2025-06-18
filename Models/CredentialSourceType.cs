@@ -7,4 +7,10 @@ namespace IlemlamlaBlazor.Models
         AwsKeyVault,
         NotFound
     }
+
+    public enum CredentialStatus
+    {
+        Found,
+        NotFound
+    }
 } 
