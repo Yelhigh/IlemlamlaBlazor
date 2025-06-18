@@ -10,6 +10,8 @@ namespace IlemlamlaBlazor.Services.Strategies
         private readonly ILogger<FileSystemStrategy> _logger;
         private readonly string _dataFilePath;
 
+        private const string JsonListField = "List";
+
         public string SourceName => "File System";
 
         public FileSystemStrategy(
@@ -32,19 +34,48 @@ namespace IlemlamlaBlazor.Services.Strategies
                 }
 
                 var json = await File.ReadAllTextAsync(_dataFilePath);
-                var data = JsonSerializer.Deserialize<BirthdayData>(json);
+                
+                var tempData = JsonSerializer.Deserialize<JsonElement>(json);
+                var listElement = tempData.GetProperty(JsonListField);
+                var items = new List<BirthdayItem>();
+                var itemCount = 0;
 
-                if (data?.List == null)
+                foreach (var item in listElement.EnumerateArray())
                 {
-                    _logger.LogError("Invalid data format in file: {FilePath}", _dataFilePath);
-                    return new List<BirthdayItem>();
+                    itemCount++;
+                    try
+                    {
+                        var name = item.GetProperty(nameof(BirthdayItem.Name)).GetString() ?? string.Empty;
+                        var date = item.GetProperty(nameof(BirthdayItem.Date)).GetString() ?? string.Empty;
+                        var positionStr = item.GetProperty(nameof(BirthdayItem.Position)).GetString() ?? "0";
+                        
+                        if (int.TryParse(positionStr, out int position))
+                        {
+                            items.Add(new BirthdayItem
+                            {
+                                Name = name,
+                                Date = date,
+                                Position = position
+                            });
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Invalid Position format in JSON: {Position}", positionStr);
+                            items.Add(new BirthdayItem
+                            {
+                                Name = name,
+                                Date = date,
+                                Position = itemCount + 1
+                            });
+                        }
+                    }
+                    catch (KeyNotFoundException ex)
+                    {
+                        _logger.LogWarning("Missing required field in JSON item: {FieldName}", ex.Message);
+                    }
                 }
 
-                return data.List
-                    .Select(x => new { Item = x, Position = int.TryParse(x.Position, out var pos) ? pos : int.MaxValue })
-                    .OrderBy(x => x.Position)
-                    .Select(x => x.Item)
-                    .ToList();
+                return items.OrderBy(x => x.Position).ToList();
             }
             catch (JsonException ex)
             {
@@ -73,8 +104,8 @@ namespace IlemlamlaBlazor.Services.Strategies
                 }
 
                 var json = await File.ReadAllTextAsync(_dataFilePath);
-                var data = JsonSerializer.Deserialize<BirthdayData>(json);
-                return data?.List != null && data.List.Any();
+                var data = JsonSerializer.Deserialize<JsonElement>(json);
+                return data.TryGetProperty(JsonListField, out var listElement) && listElement.GetArrayLength() > 0;
             }
             catch (Exception ex)
             {

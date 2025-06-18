@@ -7,7 +7,7 @@ namespace IlemlamlaBlazor.Services
     {
         private readonly IDataSourceStrategyFactory _strategyFactory;
         private readonly ILogger<BirthdayDataService> _logger;
-        private IDataSourceStrategy _currentStrategy;
+        private IDataSourceStrategy? _currentStrategy;
 
         public BirthdayDataService(
             IDataSourceStrategyFactory strategyFactory,
@@ -44,21 +44,6 @@ namespace IlemlamlaBlazor.Services
             {
                 _logger.LogError(ex, "Error checking data availability");
                 return false;
-            }
-        }
-
-        public async Task<BirthdayItem> GetBirthdayItemAsync(string id)
-        {
-            try
-            {
-                _currentStrategy = await _strategyFactory.GetStrategyAsync();
-                var data = await _currentStrategy.GetDataAsync();
-                return data.FirstOrDefault(item => item.Position == id);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error retrieving birthday item with id {id}");
-                return null;
             }
         }
 
