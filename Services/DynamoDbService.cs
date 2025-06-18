@@ -1,5 +1,6 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using Amazon.Runtime;
 using IlemlamlaBlazor.Interfaces;
 using IlemlamlaBlazor.Models;
 using Microsoft.Extensions.Configuration;
@@ -27,6 +28,7 @@ namespace IlemlamlaBlazor.Services
             {
                 if (_dynamoDbClient == null)
                 {
+                    _logger.LogWarning("DynamoDB client is null - AWS credentials not configured");
                     return false;
                 }
 
@@ -36,12 +38,42 @@ namespace IlemlamlaBlazor.Services
                     Limit = 1
                 };
 
+                _logger.LogDebug("Attempting to scan DynamoDB table: {TableName}", TableName);
                 var response = await _dynamoDbClient.ScanAsync(request);
+                
+                _logger.LogInformation("DynamoDB scan completed successfully. Table: {TableName}, Items found: {Count}", 
+                    TableName, response.Count);
                 return response.Count > 0;
+            }
+            catch (AmazonDynamoDBException ex)
+            {
+                _logger.LogError(ex, "DynamoDB operation failed. Table: {TableName}, ErrorCode: {ErrorCode}, StatusCode: {StatusCode}", 
+                    TableName, ex.ErrorCode, ex.StatusCode);
+                
+                if (ex.ErrorCode == "ResourceNotFoundException")
+                {
+                    _logger.LogError("DynamoDB table '{TableName}' does not exist", TableName);
+                }
+                else if (ex.ErrorCode == "AccessDeniedException")
+                {
+                    _logger.LogError("Access denied to DynamoDB table '{TableName}'. Check AWS credentials and permissions", TableName);
+                }
+                else if (ex.ErrorCode == "ProvisionedThroughputExceededException")
+                {
+                    _logger.LogWarning("DynamoDB table '{TableName}' exceeded provisioned throughput", TableName);
+                }
+                
+                return false;
+            }
+            catch (AmazonServiceException ex)
+            {
+                _logger.LogError(ex, "AWS service error during DynamoDB operation. Table: {TableName}, StatusCode: {StatusCode}", 
+                    TableName, ex.StatusCode);
+                return false;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error checking DynamoDB data");
+                _logger.LogError(ex, "Unexpected error checking DynamoDB data. Table: {TableName}", TableName);
                 return false;
             }
         }
@@ -52,6 +84,7 @@ namespace IlemlamlaBlazor.Services
             {
                 if (_dynamoDbClient == null)
                 {
+                    _logger.LogWarning("DynamoDB client is null - AWS credentials not configured");
                     return new List<DynamoBirthdayItem>();
                 }
 
@@ -60,25 +93,61 @@ namespace IlemlamlaBlazor.Services
                     TableName = TableName
                 };
 
+                _logger.LogDebug("Attempting to scan DynamoDB table: {TableName}", TableName);
                 var response = await _dynamoDbClient.ScanAsync(request);
+                
                 var items = new List<DynamoBirthdayItem>();
-
                 foreach (var item in response.Items)
                 {
-                    var birthdayItem = new DynamoBirthdayItem
+                    try
                     {
-                        Name = item["Name"].S,
-                        Date = item["Date"].S,
-                        Position = item["Position"].N
-                    };
-                    items.Add(birthdayItem);
+                        var birthdayItem = new DynamoBirthdayItem
+                        {
+                            Name = item["Name"].S,
+                            Date = item["Date"].S,
+                            Position = item["Position"].N
+                        };
+                        items.Add(birthdayItem);
+                    }
+                    catch (KeyNotFoundException ex)
+                    {
+                        _logger.LogWarning("Missing required field in DynamoDB item: {FieldName}", ex.Message);
+                    }
                 }
 
+                _logger.LogInformation("DynamoDB scan completed successfully. Table: {TableName}, Items retrieved: {Count}", 
+                    TableName, items.Count);
                 return items;
+            }
+            catch (AmazonDynamoDBException ex)
+            {
+                _logger.LogError(ex, "DynamoDB operation failed. Table: {TableName}, ErrorCode: {ErrorCode}, StatusCode: {StatusCode}", 
+                    TableName, ex.ErrorCode, ex.StatusCode);
+                
+                if (ex.ErrorCode == "ResourceNotFoundException")
+                {
+                    _logger.LogError("DynamoDB table '{TableName}' does not exist", TableName);
+                }
+                else if (ex.ErrorCode == "AccessDeniedException")
+                {
+                    _logger.LogError("Access denied to DynamoDB table '{TableName}'. Check AWS credentials and permissions", TableName);
+                }
+                else if (ex.ErrorCode == "ProvisionedThroughputExceededException")
+                {
+                    _logger.LogWarning("DynamoDB table '{TableName}' exceeded provisioned throughput", TableName);
+                }
+                
+                return new List<DynamoBirthdayItem>();
+            }
+            catch (AmazonServiceException ex)
+            {
+                _logger.LogError(ex, "AWS service error during DynamoDB operation. Table: {TableName}, StatusCode: {StatusCode}", 
+                    TableName, ex.StatusCode);
+                return new List<DynamoBirthdayItem>();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving data from DynamoDB");
+                _logger.LogError(ex, "Unexpected error retrieving data from DynamoDB. Table: {TableName}", TableName);
                 return new List<DynamoBirthdayItem>();
             }
         }
