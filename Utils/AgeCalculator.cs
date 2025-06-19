@@ -1,5 +1,6 @@
 using System;
 using IlemlamlaBlazor.Interfaces;
+using IlemlamlaBlazor.Localization;
 using IlemlamlaBlazor.Models;
 
 namespace IlemlamlaBlazor.Utils
