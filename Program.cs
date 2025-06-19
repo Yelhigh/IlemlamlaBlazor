@@ -1,5 +1,6 @@
 using IlemlamlaBlazor.Components;
 using IlemlamlaBlazor.Interfaces;
+using IlemlamlaBlazor.Localization;
 using IlemlamlaBlazor.Services;
 using IlemlamlaBlazor.Services.Strategies;
 using IlemlamlaBlazor.Utils;
@@ -9,32 +10,11 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
 
 builder.Host.UseSerilog();
-
-try
-{
-    var appConfigConnectionString = Environment.GetEnvironmentVariable("AZURE_APP_CONFIGURATION_CONNECTION_STRING");
-    if (!string.IsNullOrEmpty(appConfigConnectionString))
-    {
-        builder.Configuration.AddAzureAppConfiguration(options =>
-        {
-            options.Connect(appConfigConnectionString)
-                   .ConfigureKeyVault(kv =>
-                   {
-                       kv.SetCredential(new DefaultAzureCredential());
-                   });
-        });
-    }
-}
-catch (Exception ex)
-{
-    Log.Warning("Could not configure Azure App Configuration: {Message}", ex.Message);
-}
 
 try
 {
@@ -73,7 +53,7 @@ builder.Services.AddScoped<IAgeCalculator, AgeCalculator>();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-builder.Services.AddAwsServices(builder.Configuration);
+builder.Services.AddAwsServices(builder.Configuration, builder.Services.BuildServiceProvider().GetRequiredService<ILoggerFactory>());
 builder.Services.AddApplicationServices();
 builder.Services.AddSingleton<IDataSourceStrategy, DynamoDbStrategy>();
 builder.Services.AddSingleton<IDataSourceStrategy, CachedDataStrategy>();

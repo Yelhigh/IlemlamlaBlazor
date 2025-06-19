@@ -1,0 +1,3 @@
+namespace IlemlamlaBlazor.Localization
+{
+} 

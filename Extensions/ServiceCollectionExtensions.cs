@@ -10,16 +10,17 @@ namespace IlemlamlaBlazor.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddAwsServices(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddAwsServices(this IServiceCollection services, IConfiguration configuration, ILoggerFactory loggerFactory)
         {
             var (accessKey, accessKeySource) = GetCredentialWithSource(configuration, "aws-access-key", "AWS_ACCESS_KEY", CredentialSourceType.AwsKeyVault);
             var (secretKey, secretKeySource) = GetCredentialWithSource(configuration, "aws-secret-key", "AWS_SECRET_KEY", CredentialSourceType.AwsKeyVault);
             var (region, regionSource) = GetCredentialWithSource(configuration, "AWS:Region", "AWS_REGION", CredentialSourceType.Configuration);
 
+            var logger = loggerFactory.CreateLogger("AWSSetup");
+
             if (string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(secretKey))
             {
-                var logger = services.BuildServiceProvider().GetService<ILogger<IServiceCollection>>();
-                logger?.LogWarning("AWS credentials not found in configuration or environment variables. AWS services will not be available.");
+                logger.LogWarning("AWS credentials not found in configuration or environment variables. AWS services will not be available.");
                 return services;
             }
 
@@ -32,7 +33,7 @@ namespace IlemlamlaBlazor.Extensions
             services.AddDefaultAWSOptions(awsOptions);
             services.AddAWSService<IAmazonDynamoDB>();
 
-            LogCredentialSources(services, accessKey, accessKeySource, secretKey, secretKeySource, region, regionSource);
+            LogCredentialSources(logger, accessKey, accessKeySource, secretKey, secretKeySource, region, regionSource);
 
             return services;
         }
@@ -49,17 +50,16 @@ namespace IlemlamlaBlazor.Extensions
             return (value, !string.IsNullOrEmpty(value) ? CredentialSourceType.EnvironmentVariable : CredentialSourceType.NotFound);
         }
 
-        private static void LogCredentialSources(IServiceCollection services, 
+        private static void LogCredentialSources(ILogger logger, 
             string? accessKey, CredentialSourceType accessKeySource,
             string? secretKey, CredentialSourceType secretKeySource,
             string? region, CredentialSourceType regionSource)
         {
-            var logger = services.BuildServiceProvider().GetService<ILogger<IServiceCollection>>();
-            logger?.LogInformation("AWS AccessKey: {Status} (from {Source})", 
+            logger.LogInformation("AWS AccessKey: {Status} (from {Source})", 
                 string.IsNullOrEmpty(accessKey) ? CredentialStatus.NotFound : CredentialStatus.Found, accessKeySource);
-            logger?.LogInformation("AWS SecretKey: {Status} (from {Source})", 
+            logger.LogInformation("AWS SecretKey: {Status} (from {Source})", 
                 string.IsNullOrEmpty(secretKey) ? CredentialStatus.NotFound : CredentialStatus.Found, secretKeySource);
-            logger?.LogInformation("AWS Region: {Status} (from {Source})", 
+            logger.LogInformation("AWS Region: {Status} (from {Source})", 
                 string.IsNullOrEmpty(region) ? CredentialStatus.NotFound : CredentialStatus.Found, regionSource);
         }
 
