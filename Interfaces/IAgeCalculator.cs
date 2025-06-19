@@ -5,6 +5,6 @@ namespace IlemlamlaBlazor.Interfaces
     public interface IAgeCalculator
     {
         AgeUnits CalculateAge(DateTime birthDate);
-        string FormatAgeInPolish(string name, DateTime birthDate);
+        string FormatAge(string name, DateTime birthDate, string language);
     }
 } 

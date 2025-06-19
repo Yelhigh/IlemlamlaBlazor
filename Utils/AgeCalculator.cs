@@ -7,12 +7,12 @@ namespace IlemlamlaBlazor.Utils
     public class AgeCalculator : IAgeCalculator
     {
         private readonly IDateTimeProvider _dateTimeProvider;
-        private readonly IPolishPluralizer _pluralizer;
+        private readonly IPluralizerFactory _pluralizerFactory;
 
-        public AgeCalculator(IDateTimeProvider dateTimeProvider, IPolishPluralizer pluralizer)
+        public AgeCalculator(IDateTimeProvider dateTimeProvider, IPluralizerFactory pluralizerFactory)
         {
             _dateTimeProvider = dateTimeProvider;
-            _pluralizer = pluralizer;
+            _pluralizerFactory = pluralizerFactory;
         }
 
         public AgeUnits CalculateAge(DateTime birthDate)
@@ -39,22 +39,57 @@ namespace IlemlamlaBlazor.Utils
             };
         }
 
-        public string FormatAgeInPolish(string name, DateTime birthDate)
+        public string FormatAge(string name, DateTime birthDate, string language)
         {
             var age = CalculateAge(birthDate);
             var yearsFormatted = age.Years < 1 
                 ? $"{age.Years:N2}" 
                 : $"{(int)age.Years}";
-
-            return $"{name} ma: " +
-                   $"{age.Milliseconds:N0} {_pluralizer.PluralizeMilliseconds(age.Milliseconds)}, " +
-                   $"{age.Seconds:N0} {_pluralizer.PluralizeSeconds(age.Seconds)}, " +
-                   $"{age.Minutes:N0} {_pluralizer.PluralizeMinutes(age.Minutes)}, " +
-                   $"{age.Hours:N0} {_pluralizer.PluralizeHours(age.Hours)}, " +
-                   $"{age.Days:N0} {_pluralizer.PluralizeDays(age.Days)}, " +
-                   $"{age.Weeks:N0} {_pluralizer.PluralizeWeeks(age.Weeks)}, " +
-                   $"{age.Months:N0} {_pluralizer.PluralizeMonths(age.Months)} lub " +
-                   $"{yearsFormatted} {_pluralizer.PluralizeYears(age.Years)}.";
+            var pluralizer = _pluralizerFactory.GetPluralizer(language);
+            switch (language)
+            {
+                case "en":
+                    return $"{name} is: " +
+                           $"{age.Milliseconds:N0} {pluralizer.PluralizeMilliseconds(age.Milliseconds)}, " +
+                           $"{age.Seconds:N0} {pluralizer.PluralizeSeconds(age.Seconds)}, " +
+                           $"{age.Minutes:N0} {pluralizer.PluralizeMinutes(age.Minutes)}, " +
+                           $"{age.Hours:N0} {pluralizer.PluralizeHours(age.Hours)}, " +
+                           $"{age.Days:N0} {pluralizer.PluralizeDays(age.Days)}, " +
+                           $"{age.Weeks:N0} {pluralizer.PluralizeWeeks(age.Weeks)}, " +
+                           $"{age.Months:N0} {pluralizer.PluralizeMonths(age.Months)} or " +
+                           $"{yearsFormatted} {pluralizer.PluralizeYears(age.Years)}.";
+                case "de":
+                    return $"{name} ist: " +
+                           $"{age.Milliseconds:N0} {pluralizer.PluralizeMilliseconds(age.Milliseconds)}, " +
+                           $"{age.Seconds:N0} {pluralizer.PluralizeSeconds(age.Seconds)}, " +
+                           $"{age.Minutes:N0} {pluralizer.PluralizeMinutes(age.Minutes)}, " +
+                           $"{age.Hours:N0} {pluralizer.PluralizeHours(age.Hours)}, " +
+                           $"{age.Days:N0} {pluralizer.PluralizeDays(age.Days)}, " +
+                           $"{age.Weeks:N0} {pluralizer.PluralizeWeeks(age.Weeks)}, " +
+                           $"{age.Months:N0} {pluralizer.PluralizeMonths(age.Months)} oder " +
+                           $"{yearsFormatted} {pluralizer.PluralizeYears(age.Years)}.";
+                case "fr":
+                    return $"{name} a: " +
+                           $"{age.Milliseconds:N0} {pluralizer.PluralizeMilliseconds(age.Milliseconds)}, " +
+                           $"{age.Seconds:N0} {pluralizer.PluralizeSeconds(age.Seconds)}, " +
+                           $"{age.Minutes:N0} {pluralizer.PluralizeMinutes(age.Minutes)}, " +
+                           $"{age.Hours:N0} {pluralizer.PluralizeHours(age.Hours)}, " +
+                           $"{age.Days:N0} {pluralizer.PluralizeDays(age.Days)}, " +
+                           $"{age.Weeks:N0} {pluralizer.PluralizeWeeks(age.Weeks)}, " +
+                           $"{age.Months:N0} {pluralizer.PluralizeMonths(age.Months)} ou " +
+                           $"{yearsFormatted} {pluralizer.PluralizeYears(age.Years)}.";
+                case "pl":
+                default:
+                    return $"{name} ma: " +
+                           $"{age.Milliseconds:N0} {pluralizer.PluralizeMilliseconds(age.Milliseconds)}, " +
+                           $"{age.Seconds:N0} {pluralizer.PluralizeSeconds(age.Seconds)}, " +
+                           $"{age.Minutes:N0} {pluralizer.PluralizeMinutes(age.Minutes)}, " +
+                           $"{age.Hours:N0} {pluralizer.PluralizeHours(age.Hours)}, " +
+                           $"{age.Days:N0} {pluralizer.PluralizeDays(age.Days)}, " +
+                           $"{age.Weeks:N0} {pluralizer.PluralizeWeeks(age.Weeks)}, " +
+                           $"{age.Months:N0} {pluralizer.PluralizeMonths(age.Months)} lub " +
+                           $"{yearsFormatted} {pluralizer.PluralizeYears(age.Years)}.";
+            }
         }
     }
 } 

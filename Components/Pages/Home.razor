@@ -1,11 +1,13 @@
 ﻿@page "/"
 @using IlemlamlaBlazor.Interfaces
 @using IlemlamlaBlazor.Models
+@using IlemlamlaBlazor.Services
 @using IlemlamlaBlazor.Utils
 @using Microsoft.JSInterop
 @inject IBirthdayDataService BirthdayDataService
 @inject IAgeCalculator AgeCalculator
 @inject IJSRuntime JSRuntime
+@inject LanguageState LanguageState
 
 <PageTitle>Ilemlamla</PageTitle>
 @implements IDisposable
@@ -23,7 +25,7 @@
     {
         <table class="fancy-table">
             <tbody>
-                @foreach (var item in ValidBirthdayItems)
+                @foreach (var item in GetValidBirthdayItems())
                 {
                     <tr class="fancy-row tooltip-container">
                         <td @onclick="() => ToggleTooltip(item.Item)">
@@ -49,22 +51,26 @@
     Source: @currentSource
 </div>
 
-@code {
-    private List<BirthdayItem> birthdayItems;
-    private BirthdayItem selectedItem;
-    private System.Threading.Timer tooltipTimer;
-    private string currentSource;
+<div class="language-select-sticky" style="display: flex; gap: 8px; align-items: center;">
+    <select @bind="LanguageState.Language">
+        <option value="pl">Polski</option>
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="de">Deutsch</option>
+    </select>
+</div>
 
-    private List<(BirthdayItem Item, string AgeInfo)> ValidBirthdayItems => 
-        birthdayItems?
-            .Select(item => (Item: item, AgeInfo: GetAgeInfo(item)))
-            .Where(x => !string.IsNullOrEmpty(x.AgeInfo))
-            .ToList() ?? new List<(BirthdayItem, string)>();
+@code {
+    private List<BirthdayItem>? birthdayItems = null;
+    private BirthdayItem? selectedItem = null;
+    private System.Threading.Timer? tooltipTimer = null;
+    private string? currentSource = null;
 
     protected override async Task OnInitializedAsync()
     {
         birthdayItems = await BirthdayDataService.GetBirthdayItemsAsync();
         currentSource = await BirthdayDataService.GetCurrentSourceNameAsync();
+        LanguageState.Register(StateHasChanged);
     }
 
     private void ToggleTooltip(BirthdayItem item)
@@ -92,13 +98,22 @@
     {
         if (DateTime.TryParseExact(item.Date, "yyyyMMddHHmm", null, System.Globalization.DateTimeStyles.None, out DateTime birthDate))
         {
-            return AgeCalculator.FormatAgeInPolish(item.Name, birthDate);
+            return AgeCalculator.FormatAge(item.Name, birthDate, LanguageState.Language);
         }
         return string.Empty;
     }
 
+    private List<(BirthdayItem Item, string AgeInfo)> GetValidBirthdayItems()
+    {
+        return birthdayItems?
+            .Select(item => (Item: item, AgeInfo: GetAgeInfo(item)))
+            .Where(x => !string.IsNullOrEmpty(x.AgeInfo))
+            .ToList() ?? new List<(BirthdayItem, string)>();
+    }
+
     public void Dispose()
     {
+        LanguageState.Unregister(StateHasChanged);
         tooltipTimer?.Dispose();
     }
 }
