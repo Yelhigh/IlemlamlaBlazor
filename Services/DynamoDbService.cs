@@ -47,22 +47,7 @@ namespace IlemlamlaBlazor.Services
             }
             catch (AmazonDynamoDBException ex)
             {
-                _logger.LogError(ex, "DynamoDB operation failed. Table: {TableName}, ErrorCode: {ErrorCode}, StatusCode: {StatusCode}", 
-                    TableName, ex.ErrorCode, ex.StatusCode);
-                
-                if (ex.ErrorCode == AwsErrorCodes.ResourceNotFoundException)
-                {
-                    _logger.LogError("DynamoDB table '{TableName}' does not exist", TableName);
-                }
-                else if (ex.ErrorCode == AwsErrorCodes.AccessDeniedException)
-                {
-                    _logger.LogError("Access denied to DynamoDB table '{TableName}'. Check AWS credentials and permissions", TableName);
-                }
-                else if (ex.ErrorCode == AwsErrorCodes.ProvisionedThroughputExceededException)
-                {
-                    _logger.LogWarning("DynamoDB table '{TableName}' exceeded provisioned throughput", TableName);
-                }
-                
+                LogDynamoDbException(ex);
                 return false;
             }
             catch (AmazonServiceException ex)
@@ -125,22 +110,7 @@ namespace IlemlamlaBlazor.Services
             }
             catch (AmazonDynamoDBException ex)
             {
-                _logger.LogError(ex, "DynamoDB operation failed. Table: {TableName}, ErrorCode: {ErrorCode}, StatusCode: {StatusCode}", 
-                    TableName, ex.ErrorCode, ex.StatusCode);
-                
-                if (ex.ErrorCode == AwsErrorCodes.ResourceNotFoundException)
-                {
-                    _logger.LogError("DynamoDB table '{TableName}' does not exist", TableName);
-                }
-                else if (ex.ErrorCode == AwsErrorCodes.AccessDeniedException)
-                {
-                    _logger.LogError("Access denied to DynamoDB table '{TableName}'. Check AWS credentials and permissions", TableName);
-                }
-                else if (ex.ErrorCode == AwsErrorCodes.ProvisionedThroughputExceededException)
-                {
-                    _logger.LogWarning("DynamoDB table '{TableName}' exceeded provisioned throughput", TableName);
-                }
-                
+                LogDynamoDbException(ex);
                 return new List<DynamoBirthdayItem>();
             }
             catch (AmazonServiceException ex)
@@ -154,6 +124,19 @@ namespace IlemlamlaBlazor.Services
                 _logger.LogError(ex, "Unexpected error retrieving data from DynamoDB. Table: {TableName}", TableName);
                 return new List<DynamoBirthdayItem>();
             }
+        }
+
+        private void LogDynamoDbException(AmazonDynamoDBException ex)
+        {
+            _logger.LogError(ex, "DynamoDB operation failed. Table: {TableName}, ErrorCode: {ErrorCode}, StatusCode: {StatusCode}", 
+                TableName, ex.ErrorCode, ex.StatusCode);
+
+            if (ex.ErrorCode == AwsErrorCodes.ResourceNotFoundException)
+                _logger.LogError("DynamoDB table '{TableName}' does not exist", TableName);
+            else if (ex.ErrorCode == AwsErrorCodes.AccessDeniedException)
+                _logger.LogError("Access denied to DynamoDB table '{TableName}'. Check AWS credentials and permissions", TableName);
+            else if (ex.ErrorCode == AwsErrorCodes.ProvisionedThroughputExceededException)
+                _logger.LogWarning("DynamoDB table '{TableName}' exceeded provisioned throughput", TableName);
         }
     }
 } 
