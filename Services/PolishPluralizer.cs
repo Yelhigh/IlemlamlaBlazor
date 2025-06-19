@@ -2,7 +2,7 @@ using IlemlamlaBlazor.Interfaces;
 
 namespace IlemlamlaBlazor.Services
 {
-    public class PolishPluralizer : IPolishPluralizer
+    public class PolishPluralizer : IPluralizer
     {
         public string PluralizeMilliseconds(long number)
         {

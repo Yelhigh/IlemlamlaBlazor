@@ -1,6 +1,6 @@
 namespace IlemlamlaBlazor.Interfaces
 {
-    public interface IPolishPluralizer
+    public interface IPluralizer
     {
         string PluralizeMilliseconds(long number);
         string PluralizeSeconds(long number);

@@ -46,7 +46,6 @@ try
         ExcludeSharedTokenCacheCredential = true,
         ExcludeAzureCliCredential = false,
         ExcludeVisualStudioCredential = true,
-        ExcludeVisualStudioCodeCredential = true,
         ExcludeInteractiveBrowserCredential = true,
         ExcludeAzureDeveloperCliCredential = true,
         ExcludeWorkloadIdentityCredential = true
@@ -65,8 +64,12 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<IBirthdayDataService, BirthdayDataService>();
 builder.Services.AddScoped<IDateTimeProvider, DateTimeProvider>();
+builder.Services.AddScoped<PolishPluralizer>();
+builder.Services.AddScoped<EnglishPluralizer>();
+builder.Services.AddScoped<GermanPluralizer>();
+builder.Services.AddScoped<FrenchPluralizer>();
+builder.Services.AddScoped<IPluralizerFactory, PluralizerFactory>();
 builder.Services.AddScoped<IAgeCalculator, AgeCalculator>();
-builder.Services.AddScoped<IPolishPluralizer, PolishPluralizer>();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
@@ -76,6 +79,7 @@ builder.Services.AddSingleton<IDataSourceStrategy, DynamoDbStrategy>();
 builder.Services.AddSingleton<IDataSourceStrategy, CachedDataStrategy>();
 builder.Services.AddSingleton<IDataSourceStrategy, FileSystemStrategy>();
 builder.Services.AddSingleton<IDataSourceStrategyFactory, DataSourceStrategyFactory>();
+builder.Services.AddSingleton<LanguageState>();
 
 var app = builder.Build();
 
