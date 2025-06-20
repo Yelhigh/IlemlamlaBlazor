@@ -4,7 +4,7 @@ namespace IlemlamlaBlazor.Interfaces
 {
     public interface IDataSourceStrategy
     {
-        string SourceName { get; }
+        DataSourceName SourceName { get; }
         Task<List<BirthdayItem>> GetDataAsync();
         Task<bool> HasDataAsync();
     }

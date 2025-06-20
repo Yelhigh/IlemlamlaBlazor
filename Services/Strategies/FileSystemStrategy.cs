@@ -12,7 +12,7 @@ namespace IlemlamlaBlazor.Services.Strategies
 
         private const string JsonListField = "List";
 
-        public string SourceName => "File System";
+        public DataSourceName SourceName => DataSourceName.FileSystem;
 
         public FileSystemStrategy(
             IWebHostEnvironment webHostEnvironment,

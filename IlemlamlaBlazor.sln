@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IlemlamlaBlazor", "IlemlamlaBlazor.csproj", "{917E23B3-FD20-49F2-A1B1-A4CB4D6279D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IlemlamlaBlazor", "IlemlamlaBlazor.csproj", "{917E23B3-FD20-49F2-A1B1-A4CB4D6279D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IlemlamlaBlazor.Tests", "..\IlemlamlaBlazor.Tests\IlemlamlaBlazor.Tests.csproj", "{A5306241-A503-4C13-8B64-681F74787CD8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{917E23B3-FD20-49F2-A1B1-A4CB4D6279D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{917E23B3-FD20-49F2-A1B1-A4CB4D6279D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{917E23B3-FD20-49F2-A1B1-A4CB4D6279D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5306241-A503-4C13-8B64-681F74787CD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5306241-A503-4C13-8B64-681F74787CD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5306241-A503-4C13-8B64-681F74787CD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5306241-A503-4C13-8B64-681F74787CD8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

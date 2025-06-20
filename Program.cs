@@ -53,7 +53,7 @@ builder.Services.AddScoped<IAgeCalculator, AgeCalculator>();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-builder.Services.AddAwsServices(builder.Configuration, builder.Services.BuildServiceProvider().GetRequiredService<ILoggerFactory>());
+builder.Services.AddAwsServices(builder.Configuration, sp => sp.GetRequiredService<ILoggerFactory>());
 builder.Services.AddApplicationServices();
 builder.Services.AddSingleton<IDataSourceStrategy, DynamoDbStrategy>();
 builder.Services.AddSingleton<IDataSourceStrategy, CachedDataStrategy>();

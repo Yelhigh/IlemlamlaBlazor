@@ -23,7 +23,7 @@ namespace IlemlamlaBlazor.Services
             {
                 _currentStrategy = await _strategyFactory.GetStrategyAsync();
                 var data = await _currentStrategy.GetDataAsync();
-                _logger.LogInformation($"Retrieved {data.Count} items from {_currentStrategy.SourceName}");
+                _logger.LogInformation($"Retrieved {data.Count} items from {_currentStrategy.SourceName.ToString()}");
                 return data;
             }
             catch (Exception ex)
@@ -53,7 +53,7 @@ namespace IlemlamlaBlazor.Services
             {
                 _currentStrategy = await _strategyFactory.GetStrategyAsync();
             }
-            return _currentStrategy.SourceName;
+            return _currentStrategy.SourceName.ToString();
         }
     }
 }

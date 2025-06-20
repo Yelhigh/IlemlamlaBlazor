@@ -10,9 +10,9 @@ namespace IlemlamlaBlazor.Services.Strategies
     {
         private readonly IAmazonDynamoDB _dynamoDbClient;
         private readonly ILogger<DynamoDbStrategy> _logger;
-        private const string TableName = "BirthdayData";
+        private string TableName => nameof(BirthdayData);
 
-        public string SourceName => "DynamoDB";
+        public DataSourceName SourceName => DataSourceName.DynamoDb;
 
         public DynamoDbStrategy(
             IAmazonDynamoDB dynamoDbClient,
@@ -40,7 +40,7 @@ namespace IlemlamlaBlazor.Services.Strategies
                 _logger.LogDebug("Attempting to scan DynamoDB table: {TableName}", TableName);
                 var response = await _dynamoDbClient.ScanAsync(request);
                 
-                var items = response.Items.Select(item => 
+                var mappedItems = response.Items.Select(item => 
                 {
                     try
                     {
@@ -58,60 +58,22 @@ namespace IlemlamlaBlazor.Services.Strategies
                     }
                     catch (FormatException ex)
                     {
-                        _logger.LogWarning("Invalid Position format in DynamoDB item: {Position}, Error: {Error}", item[nameof(BirthdayItem.Position)].N, ex.Message);
+                        _logger.LogWarning("Invalid Position format in DynamoDB item: {Error}", ex.Message);
                         return null;
                     }
-                    catch (AmazonDynamoDBException ex)
-                    {
-                        if (ex.ErrorCode == AwsErrorCodes.ResourceNotFoundException)
-                        {
-                            _logger.LogError("DynamoDB table '{TableName}' does not exist", TableName);
-                        }
-                        else if (ex.ErrorCode == AwsErrorCodes.AccessDeniedException)
-                        {
-                            _logger.LogError("Access denied to DynamoDB table '{TableName}'. Check AWS credentials and permissions", TableName);
-                        }
-                        else if (ex.ErrorCode == AwsErrorCodes.ProvisionedThroughputExceededException)
-                        {
-                            _logger.LogWarning("DynamoDB table '{TableName}' exceeded provisioned throughput", TableName);
-                        }
-                        return null;
-                    }
-                }).Where(x => x != null).OrderBy(x => x.Position).ToList();
+                }).Where(x => x != null)
+                  .Cast<BirthdayItem>()
+                  .ToList();
+
+                var items = mappedItems.OrderBy(x => x.Position).ToList();
 
                 _logger.LogInformation("DynamoDB scan completed successfully. Table: {TableName}, Items retrieved: {Count}", 
                     TableName, items.Count);
                 return items;
             }
-            catch (AmazonDynamoDBException ex)
-            {
-                _logger.LogError(ex, "DynamoDB operation failed. Table: {TableName}, ErrorCode: {ErrorCode}, StatusCode: {StatusCode}", 
-                    TableName, ex.ErrorCode, ex.StatusCode);
-                
-                if (ex.ErrorCode == AwsErrorCodes.ResourceNotFoundException)
-                {
-                    _logger.LogError("DynamoDB table '{TableName}' does not exist", TableName);
-                }
-                else if (ex.ErrorCode == AwsErrorCodes.AccessDeniedException)
-                {
-                    _logger.LogError("Access denied to DynamoDB table '{TableName}'. Check AWS credentials and permissions", TableName);
-                }
-                else if (ex.ErrorCode == AwsErrorCodes.ProvisionedThroughputExceededException)
-                {
-                    _logger.LogWarning("DynamoDB table '{TableName}' exceeded provisioned throughput", TableName);
-                }
-                
-                return new List<BirthdayItem>();
-            }
-            catch (AmazonServiceException ex)
-            {
-                _logger.LogError(ex, "AWS service error during DynamoDB operation. Table: {TableName}, StatusCode: {StatusCode}", 
-                    TableName, ex.StatusCode);
-                return new List<BirthdayItem>();
-            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error retrieving data from DynamoDB. Table: {TableName}", TableName);
+                Utils.AwsErrorHandler.HandleDynamoDbException(ex, _logger, TableName);
                 return new List<BirthdayItem>();
             }
         }
@@ -139,35 +101,9 @@ namespace IlemlamlaBlazor.Services.Strategies
                     TableName, response.Count);
                 return response.Count > 0;
             }
-            catch (AmazonDynamoDBException ex)
-            {
-                _logger.LogError(ex, "DynamoDB operation failed. Table: {TableName}, ErrorCode: {ErrorCode}, StatusCode: {StatusCode}", 
-                    TableName, ex.ErrorCode, ex.StatusCode);
-                
-                if (ex.ErrorCode == AwsErrorCodes.ResourceNotFoundException)
-                {
-                    _logger.LogError("DynamoDB table '{TableName}' does not exist", TableName);
-                }
-                else if (ex.ErrorCode == AwsErrorCodes.AccessDeniedException)
-                {
-                    _logger.LogError("Access denied to DynamoDB table '{TableName}'. Check AWS credentials and permissions", TableName);
-                }
-                else if (ex.ErrorCode == AwsErrorCodes.ProvisionedThroughputExceededException)
-                {
-                    _logger.LogWarning("DynamoDB table '{TableName}' exceeded provisioned throughput", TableName);
-                }
-                
-                return false;
-            }
-            catch (AmazonServiceException ex)
-            {
-                _logger.LogError(ex, "AWS service error during DynamoDB operation. Table: {TableName}, StatusCode: {StatusCode}", 
-                    TableName, ex.StatusCode);
-                return false;
-            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unexpected error checking DynamoDB data. Table: {TableName}", TableName);
+                Utils.AwsErrorHandler.HandleDynamoDbException(ex, _logger, TableName);
                 return false;
             }
         }

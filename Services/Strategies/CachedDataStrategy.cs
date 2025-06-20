@@ -8,12 +8,12 @@ namespace IlemlamlaBlazor.Services.Strategies
         private readonly ILogger<CachedDataStrategy> _logger;
         private readonly List<BirthdayItem> _cachedData;
 
-        public string SourceName => "Cached Data";
+        public DataSourceName SourceName => DataSourceName.CachedData;
 
-        public CachedDataStrategy(ILogger<CachedDataStrategy> logger)
+        public CachedDataStrategy(ILogger<CachedDataStrategy> logger, List<BirthdayItem>? initialData = null)
         {
             _logger = logger;
-            _cachedData = new List<BirthdayItem>();
+            _cachedData = initialData ?? new List<BirthdayItem>();
         }
 
         public async Task<List<BirthdayItem>> GetDataAsync()

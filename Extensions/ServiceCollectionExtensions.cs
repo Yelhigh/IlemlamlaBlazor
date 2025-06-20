@@ -10,12 +10,13 @@ namespace IlemlamlaBlazor.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddAwsServices(this IServiceCollection services, IConfiguration configuration, ILoggerFactory loggerFactory)
+        public static IServiceCollection AddAwsServices(this IServiceCollection services, IConfiguration configuration, Func<IServiceProvider, ILoggerFactory> loggerFactoryFactory)
         {
             var (accessKey, accessKeySource) = GetCredentialWithSource(configuration, "aws-access-key", "AWS_ACCESS_KEY", CredentialSourceType.AwsKeyVault);
             var (secretKey, secretKeySource) = GetCredentialWithSource(configuration, "aws-secret-key", "AWS_SECRET_KEY", CredentialSourceType.AwsKeyVault);
             var (region, regionSource) = GetCredentialWithSource(configuration, "AWS:Region", "AWS_REGION", CredentialSourceType.Configuration);
 
+            var loggerFactory = loggerFactoryFactory(services.BuildServiceProvider());
             var logger = loggerFactory.CreateLogger("AWSSetup");
 
             if (string.IsNullOrEmpty(accessKey) || string.IsNullOrEmpty(secretKey))
